@@ -1,0 +1,190 @@
+diff --git a/makefile b/makefile
+index 062a73ff55..8192e0c925 100644
+--- a/makefile
++++ b/makefile
+@@ -153,7 +153,7 @@ $(GENDIR)/hwp_id.html :
+ 
+ .PHONY: check_istep_modules
+ check_istep_modules: $(OBJS)
+-	listdeps.pl $(IMGDIR)  -v
++	./src/build/tools/listdeps.pl $(IMGDIR)  -v
+ 
+ GENCONFIG_TOOL = src/build/tools/hbGenConfig
+ 
+diff --git a/src/build/mkrules/cflags.env.mk b/src/build/mkrules/cflags.env.mk
+index 50542dc65e..aa14d65922 100644
+--- a/src/build/mkrules/cflags.env.mk
++++ b/src/build/mkrules/cflags.env.mk
+@@ -50,7 +50,8 @@ ASMFLAGS += $(COMMONFLAGS) -mcpu=power9 -mbig-endian -ffreestanding -mabi=elfv1
+ CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall \
+ 	    -fuse-cxa-atexit -std=gnu++17 -Wno-register
+ LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
+-
++CXXFLAGS := $(filter-out -Werror, $(CXXFLAGS))
++CFLAGS := $(filter-out -Werror, $(CFLAGS))
+ INCFLAGS = $(addprefix -I, $(INCDIR) )
+ ASMINCFLAGS = $(addprefix $(lastword -Wa,-I), $(INCDIR))
+ 
+diff --git a/src/build/trace/makefile b/src/build/trace/makefile
+index 549dece54a..59d627368b 100644
+--- a/src/build/trace/makefile
++++ b/src/build/trace/makefile
+@@ -28,11 +28,14 @@ SUBDIRS += tracelite.d
+ 
+ GEN_PASS_BODY += tracehash extracthash
+ CLEAN_TARGETS += tracehash tracehash.o extracthash extracthash.o
+-
++$(info BFD_CFLAGS is $(BFD_CFLAGS))
++$(info BFD_LDFLAGS is $(BFD_LDFLAGS))
+ ifdef HOST_BINUTILS_DIR
+-BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/bfd/ -I$(HOST_BINUTILS_DIR)/include/
+-BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/bfd/libbfd.a -ldl \
+-	      $(HOST_BINUTILS_DIR)/libiberty/libiberty.a -lz
++BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/include/
++BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/lib/libbfd.a -ldl\
++	      $(HOST_BINUTILS_DIR)/lib/libiberty.a -lz
++$(info BFD_CFLAGS is $(BFD_CFLAGS))
++$(info BFD_LDFLAGS is $(BFD_LDFLAGS))
+ else
+ BFD_LDFLAGS = -lbfd
+ endif
+diff --git a/src/usr/diag/prdf/rule/makefile b/src/usr/diag/prdf/rule/makefile
+index cf2fda6d5d..c1f6000294 100755
+--- a/src/usr/diag/prdf/rule/makefile
++++ b/src/usr/diag/prdf/rule/makefile
+@@ -153,7 +153,7 @@ ${OBJ_PLUG_DIR}:
+ ${PRDR_CMP_YACC_C_PATH} \
+ ${PRDR_CMP_YACC_H_PATH}: ${PRDR_CMP_YACC} | ${OBJ_RULE_DIR}
+ 	${PRD_OUT_MAKE}
+-	$(C1)bison -d -o ${PRDR_CMP_YACC_C_PATH} $^
++	/usr/bin/bison -d -o ${PRDR_CMP_YACC_C_PATH} $^
+ 
+ PRDR_CMP_FLEX: ; # Discard implicit rule for %.lex <- %.lex.C
+ ${PRDR_CMP_FLEX_C_PATH}: ${PRDR_CMP_FLEX} | ${OBJ_RULE_DIR}
+diff --git a/src/usr/pldm/extended/test/makefile b/src/usr/pldm/extended/test/makefile
+index efb63ea8ae..5a1c8b2487 100644
+--- a/src/usr/pldm/extended/test/makefile
++++ b/src/usr/pldm/extended/test/makefile
+@@ -32,6 +32,6 @@ MODULE = testpldm_extended
+ EXTRAINCDIR += ${ROOTPATH}/src/import/
+ EXTRAINCDIR += ${ROOTPATH}/src/import/openbmc/pldm/libpldm/include/libpldm
+ 
+-TESTS = *.H
++#TESTS = *.H
+ 
+ include ${ROOTPATH}/config.mk
+diff --git a/src/usr/pldm/makefile b/src/usr/pldm/makefile
+index fbe863b867..c304e0ee18 100644
+--- a/src/usr/pldm/makefile
++++ b/src/usr/pldm/makefile
+@@ -30,4 +30,4 @@ SUBDIRS += base.d
+ SUBDIRS += extended.d
+ SUBDIRS += runtime.d
+ 
+-include ${ROOTPATH}/config.mk
+\ No newline at end of file
++include ${ROOTPATH}/config.mk
+diff --git a/src/makefile b/src/makefile
+index 1b8a2c9260..227a39b9d6 100644
+--- a/src/makefile
++++ b/src/makefile
+@@ -157,13 +157,13 @@ BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
+ BASE_MODULES += console
+ ifndef VPO_COMPILE
+ BASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp)
+-BASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_base)
++BASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_base)
+ endif
+ 
+ # This is exported so that gcov knows the list of base modules to
+ # exclude from instrumentation. We can't simply export BASE_MODULES or
+ # else we get duplicate modules in the list which causes linker errors.
+-GCOV_BLACKLIST += $(BASE_MODULES) mctp pldm_base
++GCOV_BLACKLIST += $(BASE_MODULES) mctp pldm_base
+ GCOV_BLACKLIST += $(DIRECT_BOOT_OBJECTS) tls.o
+ export BASE_MODULES_GCOV_BLACKLIST:=$(GCOV_BLACKLIST)
+ 
+@@ -235,7 +235,7 @@ EXTENDED_MODULES += nestmemutils
+ EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
+ EXTENDED_MODULES += xz
+ EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
+-EXTENDED_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_extended)
++EXTENDED_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_extended)
+ EXTENDED_MODULES += $(if $(CONFIG_DEVTREE),devtree)
+ endif
+ 
+@@ -292,7 +292,7 @@ TESTCASE_MODULES += testspiserial
+ TESTCASE_MODULES += testmmio
+ TESTCASE_MODULES += testeeprom
+ TESTCASE_MODULES += testdump
+-TESTCASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),testpldm_extended)
++TESTCASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),testpldm_extended)
+ endif
+ 
+ #******************************************************************
+@@ -325,7 +325,7 @@ endif
+ RUNTIME_MODULES += errl_rt       # ~/src/usr/errl/runtime/
+ RUNTIME_MODULES += trace_rt      # ~/src/usr/trace/runtime/
+ RUNTIME_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp_rt) # ~/src/usr/mctp/runtime/
+-RUNTIME_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_rt) # ~/src/usr/pldm/runtime/
++RUNTIME_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),pldm_rt) # ~/src/usr/pldm/runtime/
+ RUNTIME_MODULES += targeting_rt  # ~/src/usr/targeting/runtime/
+ RUNTIME_MODULES += util_rt       # ~/src/usr/util/runtime/
+ RUNTIME_MODULES += devicefw_rt   # ~/src/usr/devicefw/runtime/
+@@ -391,7 +391,11 @@ hbibl_OBJECTS += ${BL_BASE_OBJECTS}
+ hbibl_OBJECTS += ${BOOTLDR_OBJECTS}
+ hbibl_LDFILE = bootloader.ld
+ hbibl_NO_RELOCATION = 1
+-
++#hbicore_NO_RELOCATION = 1
++#hbirt_NO_RELOCATION = 1
++#hbibl_NO_RELOCATION = 1
++#hbicore_test_NO_RELOCATION = 1
++#hbirt_test_NO_RELOCATION = 1
+ hbicore_OBJECTS += ${BASE_OBJECTS} tls.o
+ hbicore_OBJECTS += ${DIRECT_BOOT_OBJECTS}
+ hbicore_MODULES += ${BASE_MODULES}
+diff --git a/src/build/linker/makefile b/src/build/linker/makefile
+index 523b38586c..972925f52b 100644
+--- a/src/build/linker/makefile
++++ b/src/build/linker/makefile
+@@ -23,18 +23,19 @@
+ #
+ # IBM_PROLOG_END_TAG
+ ROOTPATH = ../../..
+-
++$(info BINUTILDIRis $(HOST_BINUTILS_DIR))
++$(info BFD_LDFLAGS is $(BFD_LDFLAGS))
+ ifdef HOST_BINUTILS_DIR
+-BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/bfd/ -I$(HOST_BINUTILS_DIR)/include/
+-BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/bfd/libbfd.a -ldl \
+-	      $(HOST_BINUTILS_DIR)/libiberty/libiberty.a -lz
++BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/include/
++BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/lib/libbfd.a -ldl\
++              $(HOST_BINUTILS_DIR)/lib/libiberty.a -lz
++$(info BFD_CFLAGS is $(BFD_CFLAGS))
++$(info BFD_LDFLAGS is $(BFD_LDFLAGS))
+ else
+-BFD_LDFLAGS = -lbfd -liberty -lz
++BFD_LDFLAGS = -lbfd
+ endif
+-
+ CODE_PASS_POST += linker gensyms genlist
+ CLEAN_TARGETS += linker linker.o gensyms gensyms.o genlist genlist.o
+-
+ include $(ROOTPATH)/config.mk
+ 
+ linker: linker.C
+diff --git a/src/build/mkrules/images.rules.mk b/src/build/mkrules/images.rules.mk
+index 584475135d..cd762875df 100644
+--- a/src/build/mkrules/images.rules.mk
++++ b/src/build/mkrules/images.rules.mk
+@@ -26,7 +26,7 @@
+ # File: images.rules.mk
+ # Description:
+ #     Rules for linking the Hostboot binary images using the custom linker.
+-
++LDFLAGS := $(filter-out -fmacro-prefix-map% -fdebug-prefix-map%, $(LDFLAGS))
+ ifdef IMGS
+ _IMGS = $(addprefix $(IMGDIR)/, $(IMGS))
+ IMAGES += $(addsuffix .bin, $(_IMGS)) $(addsuffix .elf, $(_IMGS))

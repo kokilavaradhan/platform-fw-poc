@@ -1,7 +1,8 @@
-From 2b3017e7dab4d929d3ab664c5e6f94226b0a6d31 Mon Sep 17 00:00:00 2001
+From 6e78b1c88c040a742b7af82542ac7eb92eddda3d Mon Sep 17 00:00:00 2001
 From: Khem Raj <raj.khem@gmail.com>
 Date: Mon, 6 Mar 2017 23:37:05 -0800
-Subject: [PATCH] binutils-cross: Do not generate linker script directories
+Subject: [PATCH 02/15] binutils-cross: Do not generate linker script
+ directories
 
 We don't place target libraries within ${exec_prefix}, we'd always place these
 within the target sysroot within the standard library directories. Worse, the
@@ -22,10 +23,10 @@ Signed-off-by: Khem Raj <raj.khem@gmail.com>
  1 file changed, 25 deletions(-)
 
 diff --git a/ld/genscripts.sh b/ld/genscripts.sh
-index 9fbd0c4cb8a..6be07038c9b 100755
+index a5c367aa8f..6cc9eed976 100755
 --- a/ld/genscripts.sh
 +++ b/ld/genscripts.sh
-@@ -235,31 +235,6 @@ append_to_lib_path()
+@@ -189,31 +189,6 @@ append_to_lib_path()
    fi
  }
  
@@ -57,3 +58,6 @@ index 9fbd0c4cb8a..6be07038c9b 100755
  if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
    libs=${NATIVE_LIB_DIRS}
    if [ "x${NATIVE}" = "xyes" ] ; then
+-- 
+2.18.0
+

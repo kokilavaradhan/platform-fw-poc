@@ -61,6 +61,14 @@ RRECOMMENDS:${PN} += "\
     libssp-dev \
 "
 RDEPENDS:${PN} += "cpp"
+FILES_${PN}-dev += " \
+    ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/libcp1plugin.a \
+    ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/libcc1.a \
+    ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/libcc1plugin.a \
+    ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/libcp1plugin.so* \
+    ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/libcc1.so* \
+    ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/libcc1plugin.so* \
+"
 
 FILES:${PN}-dev = "\
     ${gcclibdir}/${TARGET_SYS}/${BINV}/lib*${SOLIBSDEV} \

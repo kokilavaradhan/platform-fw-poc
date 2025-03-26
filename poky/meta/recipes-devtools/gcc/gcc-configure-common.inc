@@ -42,13 +42,32 @@ EXTRA_OECONF = "\
     ${@get_gcc_multiarch_setting(bb, d)} \
 "
 
+EXTRA_OECONF += "\
+    --enable-__cxa_atexit \
+    --disable-libssp \
+     --disable-decimal-float \
+     --without-zstd \
+     --disable-libquadmath \
+       --disable-libquadmath-support \
+       --enable-tls \
+        --without-isl \
+	--without-cloog \
+    --enable-threads \
+    --with-long-double-128 \
+    --enable-languages=c,c++ \
+    --enable-shared \
+    --disable-libgomp \
+    --enable-targets=powerpc64-linux \
+    --disable-libsanitizer \
+    "
+
 # glibc version is a minimum controlling whether features are enabled. 
 # Doesn't need to track glibc exactly
 EXTRA_OECONF:append:libc-glibc = " --with-glibc-version=2.28 "
 
 # Set this here since GCC configure won't auto-detect and enable
 # initfini-arry when cross compiling.
-EXTRA_OECONF:append = " --enable-initfini-array"
+#EXTRA_OECONF:append = " --enable-initfini-array"
 
 export gcc_cv_collect2_libs = 'none required'
 # We need to set gcc_cv_collect2_libs else there is cross-compilation badness

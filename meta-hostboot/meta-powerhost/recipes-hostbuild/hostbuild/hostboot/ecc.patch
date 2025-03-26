@@ -1,0 +1,17 @@
+diff --git a/src/usr/ecc/makefile b/src/usr/ecc/makefile
+index b2d3bfdf36..e9309c4d12 100644
+--- a/src/usr/ecc/makefile
++++ b/src/usr/ecc/makefile
+@@ -62,7 +62,11 @@ ARCHIVE_OBJECTS += $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), , $(OBJDIR)/vpd_ec
+ # then it expects the hash to be stored in the file called
+ # $(IBM_FW_PROPRIETARY_COMMIT). In the case where we compile the
+ # no-op ECC implementation, this value won't be used.
+-COMMIT_HASH_DEFINITION = $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), -DIBM_FW_PROPRIETARY_COMMIT_HASH=$$(cd $(IBM_ECC_PREFIX)/.. && (git --git-dir=.git rev-parse HEAD 2>/dev/null || cat $(IBM_FW_PROPRIETARY_COMMIT) 2>/dev/null)))
++COMMIT_HASH := $(shell cd $(IBM_ECC_PREFIX)/.. && \
++    (git --git-dir=.git rev-parse HEAD 2>/dev/null || cat $(IBM_FW_PROPRIETARY_COMMIT) 2>/dev/null))
++
++COMMIT_HASH_DEFINITION = $(if $(CONFIG_COMPILE_VPD_ECC_ALGORITHMS), \
++    -DIBM_FW_PROPRIETARY_COMMIT_HASH=$(COMMIT_HASH))
+ 
+ CXXFLAGS += $(COMMIT_HASH_DEFINITION)
+ CFLAGS += $(COMMIT_HASH_DEFINITION)
